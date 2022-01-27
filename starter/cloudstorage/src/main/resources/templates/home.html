@@ -77,11 +77,13 @@
                                 <tbody>
                                     <tr th:each="note:${noteList}"}>
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button th:onclick="showNoteModal([[${note.getNoteId}]], [[${note.getNoteTitle}]], [[${note.getNoteDescription}]])"
+                                                    type="button"
+                                                    class="btn btn-success">Edit</button>
+                                            <a th:href="@{home/deleteNote/{noteId}(noteId=${note.getNoteId})}" class="btn btn-danger">Delete</a>
                                         </td>
                                         <th scope="row" th:text="${note.getNoteTitle}">Example Note Title</th>
-                                        <td th.text="${note.getNoteDescription}">Example Note Description </td>
+                                        <td th:text="${note.getNoteDescription}">Example Note Description </td>
                                     </tr>
                                 </tbody>
                             </table>
