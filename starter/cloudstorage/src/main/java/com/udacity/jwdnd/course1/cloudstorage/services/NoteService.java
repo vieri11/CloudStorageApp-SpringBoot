@@ -15,11 +15,7 @@ public class NoteService {
     }
 
     public void addNote(NoteForm addNote){
-        Note newNote = new Note();
-
-        newNote.setNoteTitle(addNote.getNoteTitle());
-        newNote.setNoteDescription(addNote.getNoteDescription());
-        newNote.setUserId(addNote.getUserId());
+        Note newNote = getNoteObj(addNote);
 
         noteMapper.insertNote(newNote);
     }
@@ -27,18 +23,20 @@ public class NoteService {
     public void deleteNote(Integer noteId) {
         noteMapper.deleteNote(noteId);
     }
+
     public Note[] getNoteListByUserId(Integer userId) {
         return noteMapper.getNotesByUserId(userId);
     }
 
     public void editNote (NoteForm noteForm) {
-        Note editNote = new Note();
-
-        editNote.setNoteId(noteForm.getNoteId());
-        editNote.setNoteTitle(noteForm.getNoteTitle());
-        editNote.setNoteDescription(noteForm.getNoteDescription());
-        editNote.setUserId(noteForm.getUserId());
+        Note editNote = getNoteObj(noteForm);
 
         noteMapper.editNote(editNote);
+    }
+
+    private Note getNoteObj(NoteForm noteForm) {
+        Note newNote = new Note(noteForm.getNoteId(), noteForm.getNoteTitle(), noteForm.getNoteDescription(), noteForm.getUserId());
+
+        return newNote;
     }
 }
