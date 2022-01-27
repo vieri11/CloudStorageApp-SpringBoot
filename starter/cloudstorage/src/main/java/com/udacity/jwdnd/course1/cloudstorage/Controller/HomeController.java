@@ -40,7 +40,6 @@ public class HomeController {
     @PostMapping("/addNote")
     //map object SPRING provides to methods called to handle requests
     public String addNote(Authentication authentication, NoteForm noteForm, Model model) {
-
         noteForm.setUserId(getUserId(authentication));
 
         if(noteForm.getNoteId() == null)
@@ -64,7 +63,10 @@ public class HomeController {
     public String addCredential(Authentication authentication, CredentialForm credentialForm, Model model) {
         credentialForm.setUserId(getUserId(authentication));
 
-        this.credentialService.addCredential(credentialForm);
+        if(credentialForm.getCredentialId() == null)
+            this.credentialService.addCredential(credentialForm);
+        else
+            this.credentialService.editCredential(credentialForm);
 
         model.addAttribute("result", "success");
         return "result";

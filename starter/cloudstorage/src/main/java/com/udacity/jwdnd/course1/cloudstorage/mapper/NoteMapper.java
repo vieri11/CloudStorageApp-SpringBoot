@@ -20,6 +20,6 @@ public interface NoteMapper {
     @Select("SELECT * FROM NOTES WHERE userid = #{userId}")
     Note[] getNotesByUserId(Integer userId);
 
-    @Update("UPDATE NOTES SET notetitle= #{noteTitle}, notedescription=#{noteDescription} WHERE noteid = #{noteId}")
+    @Update("UPDATE NOTES SET notetitle=#{noteTitle}, notedescription=#{noteDescription} WHERE noteid = #{noteId}")
     void editNote(Note noteId);
 }

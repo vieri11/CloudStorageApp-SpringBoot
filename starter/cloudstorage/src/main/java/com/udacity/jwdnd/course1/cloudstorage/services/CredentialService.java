@@ -20,19 +20,11 @@ public class CredentialService {
     }
 
     public void addCredential (CredentialForm credentialForm) {
-        // Create random key
-        SecureRandom random = new SecureRandom();
-        byte[] key = new byte[16];
-        random.nextBytes(key);
-
-        // Encrypt given password using random key
-        String encodedKey = Base64.getEncoder().encodeToString(key);
-        String encryptedPassword = encryptionService.encryptValue(credentialForm.getCredentialPassword(), encodedKey);
-
         // Set encrypted password and key
-        credentialForm.setCredentialPassword(encryptedPassword);
-        credentialForm.setKey(encodedKey);
+        credentialForm.setKey(getRandomKey());
+        credentialForm.setCredentialPassword(getEncryptedPassword(credentialForm.getCredentialPassword(), credentialForm.getKey()));
 
+        // create Credential object
         Credential newCredential = getCredentialObj(credentialForm);
 
         credentialMapper.addCredential(newCredential);
@@ -56,10 +48,33 @@ public class CredentialService {
     }
 
     public void editCredential (CredentialForm credentialForm) {
+        // Set encrypted password and key
+        credentialForm.setKey(getRandomKey());
+        credentialForm.setCredentialPassword(getEncryptedPassword(credentialForm.getCredentialPassword(), credentialForm.getKey()));
+
         Credential editCredential = getCredentialObj(credentialForm);
 
         credentialMapper.editCredential(editCredential);
     }
+
+    private String getRandomKey () {
+        // Create random key
+        SecureRandom random = new SecureRandom();
+        byte[] key = new byte[16];
+        random.nextBytes(key);
+
+        // Encrypt given password using random key
+        String encodedKey = Base64.getEncoder().encodeToString(key);
+
+        return encodedKey;
+    }
+
+    private String getEncryptedPassword(String credentialPassword, String encodedKey) {
+        String encryptedPassword = encryptionService.encryptValue(credentialPassword, encodedKey);
+
+        return encryptedPassword;
+    }
+
     private Credential getCredentialObj(CredentialForm credentialForm) {
         Credential newCredential = new Credential(credentialForm.getCredentialId(), credentialForm.getCredentialURL(), credentialForm.getCredentialUsername(),
                 credentialForm.getKey(), credentialForm.getCredentialPassword(), credentialForm.getUserId());
