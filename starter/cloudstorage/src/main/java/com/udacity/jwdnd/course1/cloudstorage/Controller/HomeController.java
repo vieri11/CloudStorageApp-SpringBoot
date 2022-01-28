@@ -7,12 +7,18 @@ import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -91,11 +97,6 @@ public class HomeController {
         byte[] fileData = new byte[(int)fileUpload.getSize()];
         fis.read(fileData);
 
-        System.out.println("filename: " + fileUpload.getOriginalFilename());
-        System.out.println("ContentType: " + fileUpload.getContentType());
-        System.out.println("FileSize: " + fileUpload.getSize());
-        System.out.println("UserId: " + getUserId(authentication));
-
         File newFile = new File(fileUpload.getOriginalFilename(), fileUpload.getContentType(), ""+fileUpload.getSize(),
                 getUserId(authentication), fileData);
 
@@ -103,6 +104,22 @@ public class HomeController {
 
         model.addAttribute("result", "success");
         return "result";
+    }
+
+    @GetMapping(
+            value = "/viewFile/{fileId}",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
+    public ResponseEntity<byte[]> viewFile (@PathVariable Integer fileId, Model model) {
+
+        File file = fileService.viewFile(fileId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-disposition", "inline;filename=" + file.getFileName());
+        ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(
+                file.getFileData(), headers, HttpStatus.OK);
+
+        return response;
     }
 
     @GetMapping("/deleteFile/{fileId}")
