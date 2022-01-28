@@ -1,18 +1,20 @@
 package com.udacity.jwdnd.course1.cloudstorage.Controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.CredentialForm;
+import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 
 @Controller
@@ -22,11 +24,13 @@ public class HomeController {
     private NoteService noteService;
     private UserService userService;
     private CredentialService credentialService;
+    private FileService fileService;
 
-    public HomeController(NoteService noteService, UserService userService, CredentialService credentialService) {
+    public HomeController(NoteService noteService, UserService userService, CredentialService credentialService, FileService fileService) {
         this.noteService = noteService;
         this.userService = userService;
         this.credentialService = credentialService;
+        this.fileService = fileService;
     }
 
     @GetMapping
@@ -34,6 +38,7 @@ public class HomeController {
     public String getHomePage(Authentication authentication, NoteForm noteForm, CredentialForm credentialForm, Model model) {
         model.addAttribute("noteList", noteService.getNoteListByUserId(getUserId(authentication)));
         model.addAttribute("credentialList", credentialService.getCredentialListByUserId(getUserId(authentication)));
+        model.addAttribute("fileList", fileService.getFileListByUserId(getUserId(authentication)));
         return "home";
     }
 
@@ -80,9 +85,29 @@ public class HomeController {
         return "result";
     }
 
+    @PostMapping("/fileUpload")
+    public String handleFileUpload(Authentication authentication, @RequestParam("fileUpload")MultipartFile fileUpload, Model model) throws IOException {
+        InputStream fis = fileUpload.getInputStream();
+        byte[] fileData = new byte[(int)fileUpload.getSize()];
+        fis.read(fileData);
+
+        System.out.println("filename: " + fileUpload.getOriginalFilename());
+        System.out.println("ContentType: " + fileUpload.getContentType());
+        System.out.println("FileSize: " + fileUpload.getSize());
+        System.out.println("UserId: " + getUserId(authentication));
+
+        File newFile = new File(fileUpload.getOriginalFilename(), fileUpload.getContentType(), ""+fileUpload.getSize(),
+                getUserId(authentication), fileData);
+
+        this.fileService.addFile(newFile);
+
+        model.addAttribute("result", "success");
+        return "result";
+    }
+
     private Integer getUserId(Authentication authentication) {
         String username = authentication.getName();
-        Integer userId = userService.getUserId(username);
+        Integer userId = this.userService.getUserId(username);
 
         return userId;
     }
