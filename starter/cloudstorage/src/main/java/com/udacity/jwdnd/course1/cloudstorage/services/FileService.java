@@ -32,4 +32,18 @@ public class FileService {
     public void deleteFile(Integer fileId) {
         fileMapper.deleteFileById(fileId);
     }
+
+    private String[] getFileNamesByUserId(Integer userId) {
+        return fileMapper.getFileNamesByUserId(userId);
+    }
+
+    public Boolean isDup (String originalFileName, Integer userId) {
+        for(String fileName : getFileNamesByUserId(userId)) {
+            if(fileName.equals(originalFileName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -92,15 +92,46 @@ public class HomeController {
     }
 
     @PostMapping("/fileUpload")
-    public String handleFileUpload(Authentication authentication, @RequestParam("fileUpload")MultipartFile fileUpload, Model model) throws IOException {
-        InputStream fis = fileUpload.getInputStream();
-        byte[] fileData = new byte[(int)fileUpload.getSize()];
-        fis.read(fileData);
+    public String addFile(Authentication authentication, @RequestParam("fileUpload")MultipartFile fileUpload, Model model) throws IOException {
+        Integer userId = getUserId(authentication);
+        String originalFileName = fileUpload.getOriginalFilename();
+        Boolean isDup = fileService.isDup(originalFileName, userId);
 
-        File newFile = new File(fileUpload.getOriginalFilename(), fileUpload.getContentType(), ""+fileUpload.getSize(),
-                getUserId(authentication), fileData);
+        // ERROR handling
+        if(isDup) {
+            model.addAttribute("result", "error");
+            model.addAttribute("errorMessage", "Duplicate File Name!");
+            return "result";
+        }
 
-        this.fileService.addFile(newFile);
+        if(originalFileName.isEmpty()) {
+            model.addAttribute("result", "error");
+            model.addAttribute("errorMessage", "Empty File Name!");
+            return "result";
+        }
+
+        if(fileUpload.getSize() == 0) {
+            model.addAttribute("result", "error");
+            model.addAttribute("errorMessage", "Empty File!");
+            return "result";
+        }
+
+        // handle IO Exception
+        try {
+            InputStream fis = fileUpload.getInputStream();
+
+            // read in file data
+            byte[] fileData = new byte[(int)fileUpload.getSize()];
+            fis.read(fileData);
+
+            File newFile = new File(originalFileName, fileUpload.getContentType(), ""+fileUpload.getSize(),
+                    userId, fileData);
+
+            this.fileService.addFile(newFile);
+        }
+        catch (Exception e) {
+            throw new IOException("Error uploading file: " + originalFileName + " Please try again.");
+        }
 
         model.addAttribute("result", "success");
         return "result";
