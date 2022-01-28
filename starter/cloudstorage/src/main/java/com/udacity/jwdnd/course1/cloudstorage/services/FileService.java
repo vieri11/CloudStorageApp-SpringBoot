@@ -22,4 +22,8 @@ public class FileService {
 
         return fileArr;
     }
+
+    public void deleteFile(Integer fileId) {
+        fileMapper.deleteFileById(fileId);
+    }
 }

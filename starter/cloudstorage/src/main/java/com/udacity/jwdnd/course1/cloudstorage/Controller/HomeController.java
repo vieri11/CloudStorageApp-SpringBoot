@@ -105,6 +105,14 @@ public class HomeController {
         return "result";
     }
 
+    @GetMapping("/deleteFile/{fileId}")
+    public String deleteFile (@PathVariable Integer fileId, Model model) {
+        fileService.deleteFile(fileId);
+
+        model.addAttribute("result", "success");
+        return "result";
+    }
+
     private Integer getUserId(Authentication authentication) {
         String username = authentication.getName();
         Integer userId = this.userService.getUserId(username);
