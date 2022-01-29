@@ -44,6 +44,34 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals("Login", driver.getTitle());
 	}
 
+	@Test
+	public void unauthorizedUser() {
+		driver.get("http://localhost:" + this.port + "/home");
+
+		// Check if we have been redirected to login page.
+		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+
+		driver.get("http://localhost:" + this.port + "/signup");
+
+		// Check if we have access to signup page
+		Assertions.assertEquals("http://localhost:" + this.port + "/signup", driver.getCurrentUrl());
+	}
+
+	@Test
+	public void logInLogOut() {
+		// Create a test account
+		doMockSignUp("qwerty","asdfg","LI","123");
+		doLogIn("LI", "123");
+
+		// Check home page accessible after login
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		doLogOut();
+
+		// check to see if unauthorized after logout
+		unauthorizedUser();
+	}
+
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
 	 * Helper method for Udacity-supplied sanity checks.
@@ -119,6 +147,21 @@ class CloudStorageApplicationTests {
 
 	}
 
+	private void doLogOut()
+	{
+		// Log in to our dummy account.
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("logout-button")));
+		WebElement loginButton = driver.findElement(By.id("logout-button"));
+		loginButton.click();
+
+		webDriverWait.until(ExpectedConditions.titleContains("Login"));
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+	}
+
 	/**
 	 * PLEASE DO NOT DELETE THIS TEST. You may modify this test to work with the 
 	 * rest of your code. 
@@ -134,7 +177,7 @@ class CloudStorageApplicationTests {
 	public void testRedirection() {
 		// Create a test account
 		doMockSignUp("Redirection","Test","RT","123");
-		
+
 		// Check if we have been redirected to the log in page.
 		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
 	}
