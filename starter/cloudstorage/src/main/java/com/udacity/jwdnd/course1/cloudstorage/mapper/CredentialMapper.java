@@ -6,11 +6,8 @@ import org.apache.ibatis.annotations.*;
 @Mapper
 public interface CredentialMapper {
 
-    @Select("SELECT * FROM CREDENTIALS WHERE userid = #{userId}")
-    Credential[] getCredentials(Integer userId);
-
     @Insert("INSERT INTO CREDENTIALS (url, username, key, password, userid) " +
-            " VALUES(#{url}, #{username}, #{key}, #{password}, #{userId})")
+            "VALUES(#{url}, #{username}, #{key}, #{password}, #{userId})")
     @Options(useGeneratedKeys=true, keyProperty="credentialId")
     Integer addCredential (Credential credential);
 

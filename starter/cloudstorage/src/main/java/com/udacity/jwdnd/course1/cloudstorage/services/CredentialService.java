@@ -36,13 +36,6 @@ public class CredentialService {
 
     public Credential[] getCredentialListByUserId(Integer userId) {
         Credential[] credentialArr = credentialMapper.getCredentialsByUserId(userId);
-        String decryptPassword;
-
-        // Decrypt all credential stored passwords
-        for(Credential credential : credentialArr) {
-            decryptPassword = encryptionService.decryptValue(credential.getPassword(), credential.getKey());
-            credential.setPassword(decryptPassword);
-        }
 
         return credentialArr;
     }
