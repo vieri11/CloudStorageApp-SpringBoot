@@ -142,7 +142,7 @@ class CloudStorageApplicationTests {
 		doMockSignUp("URL","Test","EN","123");
 		doLogIn("EN", "123");
 
-		// add note helper adds a single note
+		// add note helper adds a single note note-2
 		addNoteHelper();
 
 		// go back to home and click Notes Tab
@@ -158,14 +158,14 @@ class CloudStorageApplicationTests {
 		notesTab.click();
 
 		// check notes title is available in notes list
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-2")));
 
-		// assert note-1 was created
-		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("note title text"));
+		// assert note-2 was created
+		Assertions.assertTrue(driver.findElement(By.id("note-title-2")).getText().contains("note title text"));
 
 		// click edit button
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-note-1")));
-		WebElement editNote = driver.findElement(By.id("edit-note-1"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-note-2")));
+		WebElement editNote = driver.findElement(By.id("edit-note-2"));
 		editNote.click();
 
 		// add note title
@@ -206,15 +206,15 @@ class CloudStorageApplicationTests {
 		notesTab.click();
 
 		// check notes title is available in notes list
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-2")));
 
 		Thread.sleep(3000);
 
 		// assert note had edited title
-		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("edit title text"));
+		Assertions.assertTrue(driver.findElement(By.id("note-title-2")).getText().contains("edit title text"));
 
 		// assert note had edited description
-		Assertions.assertTrue(driver.findElement(By.id("note-description-1")).getText().contains("edit title description"));
+		Assertions.assertTrue(driver.findElement(By.id("note-description-2")).getText().contains("edit title description"));
 	}
 
 	@Test
@@ -222,6 +222,7 @@ class CloudStorageApplicationTests {
 		doMockSignUp("qwerty","asdfgh","DN","123");
 		doLogIn("DN", "123");
 
+		// add note-3
 		addNoteHelper();
 
 		Thread.sleep(2000);
@@ -237,8 +238,8 @@ class CloudStorageApplicationTests {
 
 		Thread.sleep(1000);
 
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("delete-note-1")));
-		WebElement deleteNote = driver.findElement(By.id("delete-note-1"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("delete-note-3")));
+		WebElement deleteNote = driver.findElement(By.id("delete-note-3"));
 		deleteNote.click();
 
 		Thread.sleep(1000);
@@ -260,8 +261,8 @@ class CloudStorageApplicationTests {
 
 		Thread.sleep(2000);
 
-		// note-1 should not be found
-		Assertions.assertFalse(noteFound("note-title-1"));
+		// note-3 should not be found
+		Assertions.assertFalse(noteFound("note-title-3"));
 	}
 
 	private boolean noteFound(String locatorId) {
