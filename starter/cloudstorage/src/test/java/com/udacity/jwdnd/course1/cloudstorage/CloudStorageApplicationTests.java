@@ -2,10 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -70,6 +67,210 @@ class CloudStorageApplicationTests {
 
 		// check to see if unauthorized after logout
 		unauthorizedUser();
+	}
+
+	@Test
+	public void addNote() {
+		// Create a test account
+		doMockSignUp("URL","Test","AN","123");
+		doLogIn("AN", "123");
+
+		// add note helper adds a single note
+		addNoteHelper();
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Notes Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		// check notes title is available in notes list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+
+		// assert note-1 was created
+		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("note title text"));
+	}
+
+	// assumes you're successfully logged in and adds a note
+	private void addNoteHelper()
+	{
+		// Visit home page.
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		driver.get("http://localhost:" + this.port + "/home");
+
+		// find and click Notes Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		// click add new note button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("add-new-note")));
+		WebElement addNewNote = driver.findElement(By.id("add-new-note"));
+		addNewNote.click();
+
+		// add note title
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		WebElement noteTitle = driver.findElement(By.id("note-title"));
+		noteTitle.click();
+		noteTitle.sendKeys("note title text");
+
+		//add note description
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
+		WebElement noteDescription = driver.findElement(By.id("note-description"));
+		noteDescription.click();
+		noteDescription.sendKeys("note title description");
+
+		// click save button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("save-note-button")));
+		WebElement saveNote = driver.findElement(By.id("save-note-button"));
+		saveNote.click();
+
+		// confirm result was a success
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+	}
+
+	@Test
+	public void editNote() throws InterruptedException {
+		// Create a test account
+		doMockSignUp("URL","Test","EN","123");
+		doLogIn("EN", "123");
+
+		// add note helper adds a single note
+		addNoteHelper();
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Notes Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		// check notes title is available in notes list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+
+		// assert note-1 was created
+		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("note title text"));
+
+		// click edit button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-note-1")));
+		WebElement editNote = driver.findElement(By.id("edit-note-1"));
+		editNote.click();
+
+		// add note title
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		WebElement noteTitle = driver.findElement(By.id("note-title"));
+		noteTitle.click();
+		noteTitle.clear();
+		noteTitle.sendKeys("edit title text");
+
+		//add note description
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
+		WebElement noteDescription = driver.findElement(By.id("note-description"));
+		noteDescription.click();
+		noteDescription.clear();
+		noteDescription.sendKeys("edit title description");
+
+		Thread.sleep(3000);
+
+		// click save button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("save-note-button")));
+		WebElement saveNote = driver.findElement(By.id("save-note-button"));
+		saveNote.click();
+
+		// confirm result was a success
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Notes Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		// check notes title is available in notes list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+
+		Thread.sleep(3000);
+
+		// assert note had edited title
+		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("edit title text"));
+
+		// assert note had edited description
+		Assertions.assertTrue(driver.findElement(By.id("note-description-1")).getText().contains("edit title description"));
+	}
+
+	@Test
+	public void deleteNote() throws InterruptedException {
+		doMockSignUp("qwerty","asdfgh","DN","123");
+		doLogIn("DN", "123");
+
+		addNoteHelper();
+
+		Thread.sleep(2000);
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// click Notes Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		Thread.sleep(1000);
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("delete-note-1")));
+		WebElement deleteNote = driver.findElement(By.id("delete-note-1"));
+		deleteNote.click();
+
+		Thread.sleep(1000);
+
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+
+		Thread.sleep(1000);
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		webDriverWait = new WebDriverWait(driver, 2);
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		notesTab = driver.findElement(By.id("nav-notes-tab"));
+		notesTab.click();
+
+		Thread.sleep(2000);
+
+		// note-1 should not be found
+		Assertions.assertFalse(noteFound("note-title-1"));
+	}
+
+	private boolean noteFound(String locatorId) {
+		try {
+			driver.findElement(By.id(locatorId));
+			return true;
+		} catch (NoSuchElementException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -145,6 +346,8 @@ class CloudStorageApplicationTests {
 
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
 
+		// Check home page accessible after login
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
 	}
 
 	private void doLogOut()
