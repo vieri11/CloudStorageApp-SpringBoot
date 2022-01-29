@@ -3,10 +3,7 @@ package com.udacity.jwdnd.course1.cloudstorage.Controller;
 import com.udacity.jwdnd.course1.cloudstorage.model.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
-import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
-import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
-import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
-import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import com.udacity.jwdnd.course1.cloudstorage.services.*;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,12 +28,15 @@ public class HomeController {
     private UserService userService;
     private CredentialService credentialService;
     private FileService fileService;
+    private EncryptionService encryptionService;
 
-    public HomeController(NoteService noteService, UserService userService, CredentialService credentialService, FileService fileService) {
+    public HomeController(NoteService noteService, UserService userService, CredentialService credentialService, FileService fileService,
+                          EncryptionService encryptionService) {
         this.noteService = noteService;
         this.userService = userService;
         this.credentialService = credentialService;
         this.fileService = fileService;
+        this.encryptionService = encryptionService;
     }
 
     @GetMapping
@@ -45,6 +45,7 @@ public class HomeController {
         model.addAttribute("noteList", noteService.getNoteListByUserId(getUserId(authentication)));
         model.addAttribute("credentialList", credentialService.getCredentialListByUserId(getUserId(authentication)));
         model.addAttribute("fileList", fileService.getFileListByUserId(getUserId(authentication)));
+        model.addAttribute("encryptionService", encryptionService);
         return "home";
     }
 
