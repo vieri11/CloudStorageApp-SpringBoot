@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -76,7 +77,7 @@ class CloudStorageApplicationTests {
 		doLogIn("AN", "123");
 
 		// add note helper adds a single note
-		addNoteHelper();
+		addNoteHelper("test add note", "test add note description");
 
 		// go back to home and click Notes Tab
 		driver.get("http://localhost:" + this.port + "/home");
@@ -90,15 +91,20 @@ class CloudStorageApplicationTests {
 		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
 		notesTab.click();
 
-		// check notes title is available in notes list
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+		// get id of note element just inserted
+		String noteID = driver.findElement(By.xpath("//*[@id=\"note-table-body\"]/tr/th[text()='test add note']")).getAttribute("id");
 
-		// assert note-1 was created
-		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("note title text"));
+		System.out.println("noteID: " + noteID);
+
+		// check notes title is available in notes list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(noteID)));
+
+		// assert test add note was created
+		Assertions.assertTrue(driver.findElement(By.id(noteID)).getText().contains("test add note"));
 	}
 
 	// assumes you're successfully logged in and adds a note
-	private void addNoteHelper()
+	private void addNoteHelper(String addNoteTitle, String addNoteDescription)
 	{
 		// Visit home page.
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
@@ -118,13 +124,13 @@ class CloudStorageApplicationTests {
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
 		WebElement noteTitle = driver.findElement(By.id("note-title"));
 		noteTitle.click();
-		noteTitle.sendKeys("note title text");
+		noteTitle.sendKeys(addNoteTitle);
 
 		//add note description
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
 		WebElement noteDescription = driver.findElement(By.id("note-description"));
 		noteDescription.click();
-		noteDescription.sendKeys("note title description");
+		noteDescription.sendKeys(addNoteDescription);
 
 		// click save button
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("save-note-button")));
@@ -143,7 +149,7 @@ class CloudStorageApplicationTests {
 		doLogIn("EN", "123");
 
 		// add note helper adds a single note
-		addNoteHelper();
+		addNoteHelper("edit note title", "edit note description");
 
 		// go back to home and click Notes Tab
 		driver.get("http://localhost:" + this.port + "/home");
@@ -157,15 +163,24 @@ class CloudStorageApplicationTests {
 		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
 		notesTab.click();
 
-		// check notes title is available in notes list
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+		// get id of title note element just inserted
+		String noteID = driver.findElement(By.xpath("//*[@id=\"note-table-body\"]/tr/th[text()='edit note title']")).getAttribute("id");
+		String noteDescriptionId = driver.findElement(By.xpath("//*[@id=\"note-table-body\"]/tr/td[text()='edit note description']")).getAttribute("id");
 
-		// assert note-1 was created
-		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("note title text"));
+		System.out.println("noteID: " + noteID);
+
+		// check notes title is available in notes list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(noteID)));
+
+		// assert edit note was created
+		Assertions.assertTrue(driver.findElement(By.id(noteID)).getText().contains("edit note title"));
+
+		// get id of edit element of  note inserted
+		String editNoteButtonID = driver.findElement(By.xpath("//*[@id=\"" +  noteID + "\"]/preceding-sibling::td/button")).getAttribute("id");
 
 		// click edit button
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-note-1")));
-		WebElement editNote = driver.findElement(By.id("edit-note-1"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(editNoteButtonID)));
+		WebElement editNote = driver.findElement(By.id(editNoteButtonID));
 		editNote.click();
 
 		// add note title
@@ -173,14 +188,14 @@ class CloudStorageApplicationTests {
 		WebElement noteTitle = driver.findElement(By.id("note-title"));
 		noteTitle.click();
 		noteTitle.clear();
-		noteTitle.sendKeys("edit title text");
+		noteTitle.sendKeys("edit text of note");
 
 		//add note description
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
 		WebElement noteDescription = driver.findElement(By.id("note-description"));
 		noteDescription.click();
 		noteDescription.clear();
-		noteDescription.sendKeys("edit title description");
+		noteDescription.sendKeys("edit text of title description");
 
 		Thread.sleep(3000);
 
@@ -206,15 +221,15 @@ class CloudStorageApplicationTests {
 		notesTab.click();
 
 		// check notes title is available in notes list
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-1")));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(noteID)));
 
 		Thread.sleep(3000);
 
 		// assert note had edited title
-		Assertions.assertTrue(driver.findElement(By.id("note-title-1")).getText().contains("edit title text"));
+		Assertions.assertTrue(driver.findElement(By.id(noteID)).getText().contains("edit text of note"));
 
 		// assert note had edited description
-		Assertions.assertTrue(driver.findElement(By.id("note-description-1")).getText().contains("edit title description"));
+		Assertions.assertTrue(driver.findElement(By.id(noteDescriptionId)).getText().contains("edit text of title description"));
 	}
 
 	@Test
@@ -222,7 +237,8 @@ class CloudStorageApplicationTests {
 		doMockSignUp("qwerty","asdfgh","DN","123");
 		doLogIn("DN", "123");
 
-		addNoteHelper();
+		// add note if none exists
+		addNoteHelper("delete note title", "delete note description");
 
 		Thread.sleep(2000);
 
@@ -237,8 +253,14 @@ class CloudStorageApplicationTests {
 
 		Thread.sleep(1000);
 
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("delete-note-1")));
-		WebElement deleteNote = driver.findElement(By.id("delete-note-1"));
+		// get id of title note element just inserted
+		String noteID = driver.findElement(By.xpath("//*[@id=\"note-table-body\"]/tr/th[text()='delete note title']")).getAttribute("id");
+
+		// find element to delete
+		String deleteNoteButtonID = driver.findElement(By.xpath("//*[@id=\"" +  noteID + "\"]/preceding-sibling::td/a")).getAttribute("id");
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(deleteNoteButtonID)));
+		WebElement deleteNote = driver.findElement(By.id(deleteNoteButtonID));
 		deleteNote.click();
 
 		Thread.sleep(1000);
@@ -260,8 +282,8 @@ class CloudStorageApplicationTests {
 
 		Thread.sleep(2000);
 
-		// note-1 should not be found
-		Assertions.assertFalse(noteFound("note-title-1"));
+		// note inserted should no longer be found
+		Assertions.assertFalse(noteFound(noteID));
 	}
 
 	private boolean noteFound(String locatorId) {
@@ -271,6 +293,266 @@ class CloudStorageApplicationTests {
 		} catch (NoSuchElementException e) {
 			return false;
 		}
+	}
+
+	@Test
+	public void addCredential() throws InterruptedException {
+		// Create a test account
+		doMockSignUp("URL","Test","AC","123");
+		doLogIn("AC", "123");
+
+		// add credentials
+		addCredentialHelper("http://www.google.com", "add credential username 1", "add credential password 1");
+		addCredentialHelper("http://www.gmail.com", "add credential username 2", "add credential password 2");
+
+		// go back to home and click Credential Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Credential Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		WebElement credentialTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialTab.click();
+
+		Thread.sleep(3000);
+
+		// get credential element just inserted
+		String credentialURL1 = driver.findElement(By.xpath("//*[@id=\"credential-table-body\"]/tr/th[text()='http://www.google.com']")).getAttribute("id");
+		String credentialURL2 = driver.findElement(By.xpath("//*[@id=\"credential-table-body\"]/tr/th[text()='http://www.gmail.com']")).getAttribute("id");
+
+		String credentialUsername1 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL1 + "\"]/following-sibling::td[1]")).getAttribute("id");
+		String credentialPassword1 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL1 + "\"]/following-sibling::td[2]")).getAttribute("id");
+
+		String credentialUsername2 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL2 + "\"]/following-sibling::td[1]")).getAttribute("id");
+		String credentialPassword2 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL2 + "\"]/following-sibling::td[2]")).getAttribute("id");
+
+		// check credential is available in credential list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(credentialURL1)));
+		// check credential is available in credential list
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(credentialURL2)));
+
+		// assert credential URLs
+		Assertions.assertEquals(driver.findElement(By.id(credentialURL1)).getText(), "http://www.google.com");
+		Assertions.assertEquals(driver.findElement(By.id(credentialURL2)).getText(), "http://www.gmail.com");
+
+		// assert credential usernames
+		Assertions.assertEquals(driver.findElement(By.id(credentialUsername1)).getText(), "add credential username 1");
+		Assertions.assertEquals(driver.findElement(By.id(credentialUsername2)).getText(), "add credential username 2");
+
+		// assert credential passwords dont equal
+		Assertions.assertNotEquals(driver.findElement(By.id(credentialPassword1)).getText(), "add credential password 1");
+		Assertions.assertNotEquals(driver.findElement(By.id(credentialPassword2)).getText(), "add credential password 2");
+	}
+
+	// assumes you're successfully logged in and adds a credential
+	private void addCredentialHelper(String credentialURL, String credentialUsername, String credentialPassword)
+	{
+		// Visit home page.
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		driver.get("http://localhost:" + this.port + "/home");
+
+		// find and click Credentials Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		WebElement credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialsTab.click();
+
+		// click add new credential button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("add-new-credential")));
+		WebElement addNewCredential = driver.findElement(By.id("add-new-credential"));
+		addNewCredential.click();
+
+		// add credential url
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		WebElement credentialURLElem = driver.findElement(By.id("credential-url"));
+		credentialURLElem.click();
+		credentialURLElem.sendKeys(credentialURL);
+
+		//add credential username
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		WebElement credentialUsernameElem = driver.findElement(By.id("credential-username"));
+		credentialUsernameElem.click();
+		credentialUsernameElem.sendKeys(credentialUsername);
+
+		//add credential password
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		WebElement credentialPasswordElem = driver.findElement(By.id("credential-password"));
+		credentialPasswordElem.click();
+		credentialPasswordElem.sendKeys(credentialPassword);
+
+		// click save button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("save-credential-button")));
+		WebElement saveCredential = driver.findElement(By.id("save-credential-button"));
+		saveCredential.click();
+
+		// confirm result was a success
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+	}
+
+	@Test
+	public void editCredential() throws InterruptedException {
+
+		// Create a test account
+		doMockSignUp("URL","Test","EC","123");
+		doLogIn("EC", "123");
+
+		// add credential to edit
+		addCredentialHelper("http://www.udacity.com", "edit credential username 1", "edit credential password 1");
+
+		// go back to home and click Credentials Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Credential Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		WebElement credentialTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialTab.click();
+
+		String credentialURL1 = driver.findElement(By.xpath("//*[@id=\"credential-table-body\"]/tr/th[text()='http://www.udacity.com']")).getAttribute("id");
+
+		String credentialUsername1 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL1 + "\"]/following-sibling::td[1]")).getAttribute("id");
+
+		String credentialPassword1 = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL1 + "\"]/following-sibling::td[2]")).getAttribute("id");
+
+		// check credential url 1 already exists
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(credentialURL1)));
+
+		// assert credential-1 was created
+		Assertions.assertTrue(driver.findElement(By.id(credentialURL1)).getText().contains("http://www.udacity.com"));
+
+		System.out.println("credential url id: " + credentialURL1);
+
+		// get id of edit element of credential inserted
+		String editCredentialButtonID = driver.findElement(By.xpath("//*[@id=\"" +  credentialURL1 + "\"]/preceding-sibling::td/button")).getAttribute("id");
+
+		System.out.println("credential button id: " + editCredentialButtonID);
+
+		// click edit button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(editCredentialButtonID)));
+		WebElement editCredential = driver.findElement(By.id(editCredentialButtonID));
+		editCredential.click();
+
+		// edit credential url
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		WebElement credentialURL = driver.findElement(By.id("credential-url"));
+		credentialURL.click();
+		credentialURL.clear();
+		credentialURL.sendKeys("edited URL text");
+
+		//edit credential username
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		WebElement credentialPassword = driver.findElement(By.id("credential-username"));
+		credentialPassword.click();
+		credentialPassword.clear();
+		credentialPassword.sendKeys("edited username text");
+
+		// edit credential password
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		credentialPassword = driver.findElement(By.id("credential-password"));
+
+		// assert credential-1 original password equals viewable password
+		Assertions.assertEquals(driver.findElement(By.id("credential-password")).getAttribute("value"), "edit credential password 1");
+
+		credentialPassword.click();
+		credentialPassword.clear();
+		credentialPassword.sendKeys("edited password text");
+
+		Thread.sleep(2000);
+
+		// click save button
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("save-credential-button")));
+		WebElement saveCredential = driver.findElement(By.id("save-credential-button"));
+		saveCredential.click();
+
+		// confirm result was a success
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+
+		// go back to home and click Credentials Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		webDriverWait = new WebDriverWait(driver, 2);
+
+		// check home page still available
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		// click Credentials Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		credentialTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialTab.click();
+
+		// check credential-1 is available
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(credentialURL1)));
+
+		Thread.sleep(3000);
+
+		// assert credential has edited url
+		Assertions.assertTrue(driver.findElement(By.id(credentialURL1)).getText().contains("edited URL text"));
+
+		// assert credential has edited username
+		Assertions.assertTrue(driver.findElement(By.id(credentialUsername1)).getText().contains("edited username text"));
+
+		// assert credential has edited password encrypted
+		Assertions.assertFalse(driver.findElement(By.id(credentialPassword1)).getText().contains("edited password text"));
+	}
+
+	@Test
+	public void deleteCredential() throws InterruptedException {
+		doMockSignUp("qwerty","asdfgh","DC","123");
+		doLogIn("DC", "123");
+
+		// add note if none exists
+		addCredentialHelper("delete credential URL", "delete credential username", "delete credential password");
+
+		Thread.sleep(2000);
+
+		// go back to home and click Credential Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		// click Credential Tab
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		WebElement credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialsTab.click();
+
+		Thread.sleep(1000);
+
+		// get id of credential element just inserted
+		String credentialID = driver.findElement(By.xpath("//*[@id=\"credential-table-body\"]/tr/th[text()='delete credential URL']")).getAttribute("id");
+
+		// find element to delete
+		String deleteCredentialButtonID = driver.findElement(By.xpath("//*[@id=\"" +  credentialID + "\"]/preceding-sibling::td/a")).getAttribute("id");
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(deleteCredentialButtonID)));
+		WebElement deleteNote = driver.findElement(By.id(deleteCredentialButtonID));
+		deleteNote.click();
+
+		Thread.sleep(1000);
+
+		webDriverWait.until(ExpectedConditions.titleContains("Result"));
+		Assertions.assertTrue(driver.findElement(By.id("success")).getText().contains("Success"));
+
+		Thread.sleep(1000);
+
+		// go back to home and click Notes Tab
+		driver.get("http://localhost:" + this.port + "/home");
+		webDriverWait = new WebDriverWait(driver, 2);
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		credentialsTab.click();
+
+		Thread.sleep(2000);
+
+		// note inserted should no longer be found
+		Assertions.assertFalse(noteFound(credentialID));
 	}
 
 	/**

@@ -20,4 +20,7 @@ public interface CredentialMapper {
     @Update("UPDATE CREDENTIALS SET url= #{url}, username=#{username}, key=#{key}, password=#{password} " +
             "WHERE credentialid = #{credentialId}")
     void editCredential(Credential credentialId);
+
+    @Select("SELECT * FROM CREDENTIALS WHERE credentialid = #{credentialId}")
+    Credential getCredentialByCredentialId(Integer credentialId);
 }
