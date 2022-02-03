@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.Controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.services.ErrorMessageService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.GetUserIdService;
 import org.springframework.http.HttpHeaders;
@@ -21,10 +22,12 @@ import java.io.InputStream;
 public class FileController {
     private FileService fileService;
     private GetUserIdService getUserIdService;
+    private ErrorMessageService errorMessageService;
 
-    public FileController(FileService fileService, GetUserIdService getUserIdService) {
+    public FileController(FileService fileService, GetUserIdService getUserIdService, ErrorMessageService errorMessageService) {
         this.fileService = fileService;
         this.getUserIdService = getUserIdService;
+        this.errorMessageService = errorMessageService;
     }
 
     @PostMapping("/fileUpload")
@@ -36,25 +39,25 @@ public class FileController {
         // ERROR handling
         if(isDup) {
             model.addAttribute("result", "error");
-            model.addAttribute("errorMessage", "Duplicate File Name!");
+            model.addAttribute("errorMessage", errorMessageService.duplicateFilenameMessage);
             return "result";
         }
 
         if(originalFileName.isEmpty()) {
             model.addAttribute("result", "error");
-            model.addAttribute("errorMessage", "Empty File Name!");
+            model.addAttribute("errorMessage", errorMessageService.noFileMessage);
             return "result";
         }
 
         if(fileUpload.getSize() == 0) {
             model.addAttribute("result", "error");
-            model.addAttribute("errorMessage", "Empty File!");
+            model.addAttribute("errorMessage", errorMessageService.emptyFileMessage);
             return "result";
         }
 
         if(fileUpload.getSize() > 10000000) {
             model.addAttribute("result", "error");
-            model.addAttribute("errorMessage", "File too large!");
+            model.addAttribute("errorMessage", errorMessageService.fileTooLargeMessage);
             return "result";
         }
 
@@ -76,7 +79,7 @@ public class FileController {
             throw new IOException("Error uploading file: " + originalFileName + " Please try again.");
         }
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 
@@ -100,7 +103,7 @@ public class FileController {
     public String deleteFile (@PathVariable Integer fileId, Model model) {
         fileService.deleteFile(fileId);
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 }

@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.Controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
+import com.udacity.jwdnd.course1.cloudstorage.services.ErrorMessageService;
 import com.udacity.jwdnd.course1.cloudstorage.services.GetUserIdService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import org.springframework.security.core.Authentication;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class NoteController {
     private NoteService noteService;
     private GetUserIdService getUserIdService;
+    private ErrorMessageService errorMessageService;
 
-    public NoteController(NoteService noteService, GetUserIdService getUserIdService) {
+    public NoteController(NoteService noteService, GetUserIdService getUserIdService, ErrorMessageService errorMessageService) {
         this.noteService = noteService;
         this.getUserIdService = getUserIdService;
+        this.errorMessageService = errorMessageService;
     }
 
     @PostMapping("/addNote")
@@ -32,7 +35,7 @@ public class NoteController {
         else
             this.noteService.editNote(noteForm);
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 
@@ -40,7 +43,7 @@ public class NoteController {
     public String deleteNote (@PathVariable Integer noteId, Model model) {
         noteService.deleteNote(noteId);
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 }

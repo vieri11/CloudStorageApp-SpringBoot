@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage.Controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.ErrorMessageService;
 import com.udacity.jwdnd.course1.cloudstorage.services.GetUserIdService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CredentialController {
     private CredentialService credentialService;
     private GetUserIdService getUserIdService;
+    private ErrorMessageService errorMessageService;
 
-    public CredentialController(CredentialService credentialService, GetUserIdService getUserIdService) {
+    public CredentialController(CredentialService credentialService, GetUserIdService getUserIdService, ErrorMessageService errorMessageService) {
         this.credentialService = credentialService;
         this.getUserIdService = getUserIdService;
+        this.errorMessageService = errorMessageService;
     }
 
     @PostMapping("/addCredential")
@@ -31,7 +34,7 @@ public class CredentialController {
         else
             this.credentialService.editCredential(credentialForm);
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 
@@ -39,7 +42,7 @@ public class CredentialController {
     public String deleteCredential (@PathVariable Integer credentialId, Model model) {
         credentialService.deleteCredential(credentialId);
 
-        model.addAttribute("result", "success");
+        model.addAttribute("result", errorMessageService.successMessage);
         return "result";
     }
 }
